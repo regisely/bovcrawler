@@ -1,1 +1,1 @@
-worker: python bovcrawler.py
+worker: python bovcrawler.py -d D16022016
