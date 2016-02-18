@@ -37,7 +37,7 @@ if args.csv:
        writer.writerows(table)
 else:
     try:
-        conn = psycopg2.connect("dbname='d42gerp07cu8em' user='dcemakroeprcer' host='ec2-54-83-29-133.compute-1.amazonaws.com' password='2oAEdkG9Q6RHDhhgBNEhKhk70Q'")
+        conn = psycopg2.connect("dbname='dam116fpa46fq' user='cshruoasanqkvw' host='ec2-107-20-153-141.compute-1.amazonaws.com' password='opQpRKayfgopB0lA2jwVbTjx8p'")
         cur = conn.cursor()
         args_str = ','.join(cur.mogrify("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", x) for x in table)
         cur.execute("INSERT INTO dailyquotes (TIPREG, DATAPREG, CODBI, CODNEG, TPMERC, NOMRES, ESPECI, PRAZOT, MODREF, PREABE, PREMAX, PREMIN, PREMED, PREULT, PREOFC, PREOFV, TOTNEG, QUATOT, VOLTOT, PREEXE, INDOPC, DATVEN, FATCOT, PTOEXE, CODISI, DISMES) VALUES " + args_str)
