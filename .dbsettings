@@ -1,4 +1,4 @@
-dbname='dam116fpa46fq'
-user='cshruoasanqkvw'
-host='ec2-107-20-153-141.compute-1.amazonaws.com'
-password='opQpRKayfgopB0lA2jwVbTjx8p'
+dbname='bovespa10Mdb'
+user='bov10Mdaily'
+host='bovespadb.cbzq8i10mrfp.us-west-2.rds.amazonaws.com'
+password='Br&g!$O2171V'
