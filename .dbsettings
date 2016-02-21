@@ -1,4 +1,4 @@
-dbname='bovespa10Mdb'
-user='bov10Mdaily'
-host='bovespadb.cbzq8i10mrfp.us-west-2.rds.amazonaws.com'
-password='Br&g!$O2171V'
+dbname='postgres'
+user='postgres'
+host='localhost'
+password=''
