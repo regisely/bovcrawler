@@ -82,8 +82,14 @@ if __name__ == "__main__":
         args.date = [args.date]
 
     # Start loop through dates
+    table = []
+    keys_table = ['TIPREG', 'DATAPREG', 'CODDBI', 'CODNEG', 'TPMERC',
+                  'NOMRES', 'ESPECI', 'PRAZOT', 'MODREF', 'PREABE',
+                  'PREMAX', 'PREMIN', 'PREMED', 'PREULT', 'PREOFC',
+                  'PREOFV', 'TOTNEG', 'QUATOT', 'VOLTOT', 'PREEXE',
+                  'INDOPC', 'DATVEN', 'FATCOT', 'PTOEXE', 'CODISI',
+                  'DISMES']
     for dateurl in args.date:    
-        table = []
 
         # Download file
         print "Working on " + dateurl + "..."
@@ -125,94 +131,84 @@ if __name__ == "__main__":
                 " ".join(line[230:242].split()), int(line[242:245])))
         print "[DONE]"
 
-        # Save data in PostgreSQL table
-        if args.db:
-            print "Saving data into pSQL table 'bovquotes'...",
-            if isfile(".dbsettings_1"):
-                with open(".dbsettings_1", 'r') as f:
+    # Save data in PostgreSQL table
+    if args.db:
+        print "Saving data into pSQL table 'bovquotes'...",
+        if isfile(".dbsettings_1"):
+            with open(".dbsettings_1", 'r') as f:
+                dbset = f.read().replace('\n', ' ')
+        else:
+            try:
+                with open(".dbsettings", 'r') as f:
                     dbset = f.read().replace('\n', ' ')
-            else:
-                try:
-                    with open(".dbsettings", 'r') as f:
-                        dbset = f.read().replace('\n', ' ')
-                except:
-                    print("Error: missing file .dbsettings")
-                    sys.exit(1)
-            conn = None
-            try:
-                conn = psycopg2.connect(dbset)
-                cur = conn.cursor()
-                cur.execute(
-                    "CREATE TABLE IF NOT EXISTS bovquotes (TIPREG "
-                    "INTEGER, DATAPREG DATE, CODDBI VARCHAR(2), CODNEG "
-                    "VARCHAR(12), TPMERC INTEGER, NOMRES VARCHAR(12), "
-                    "ESPECI VARCHAR(10), PRAZOT VARCHAR(3), MODREF "
-                    "VARCHAR(4), PREABE DECIMAL(13,2), PREMAX "
-                    "DECIMAL(13,2), PREMIN DECIMAL(13,2), PREMED "
-                    "DECIMAL(13,2), PREULT DECIMAL(13,2), PREOFC "
-                    "DECIMAL(13,2), PREOFV DECIMAL(13,2), TOTNEG "
-                    "INTEGER, QUATOT BIGINT, VOLTOT DECIMAL(18,2), "
-                    "PREEXE DECIMAL(13,2), INDOPC INTEGER, DATVEN DATE, "
-                    "FATCOT INTEGER, PTOEXE DECIMAL(13,6), CODISI "
-                    "VARCHAR(12), DISMES INTEGER, PRIMARY KEY(TPMERC, "
-                    "CODDBI, CODNEG, DATAPREG, PRAZOT))")
-                args_str = ','.join(cur.mogrify(
-                    "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
-                    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
-                    "%s, %s)", x) for x in table)
-                cur.execute("INSERT INTO bovquotes (TIPREG, DATAPREG, "
-                            "CODDBI, CODNEG, TPMERC, NOMRES, ESPECI, "
-                            "PRAZOT, MODREF, PREABE, PREMAX, PREMIN, "
-                            "PREMED, PREULT, PREOFC, PREOFV, TOTNEG, "
-                            "QUATOT, VOLTOT, PREEXE, INDOPC, DATVEN, "
-                            "FATCOT, PTOEXE, CODISI, DISMES) VALUES " +
-                            args_str)
-                conn.commit()
-                print "[DONE]"
-            except psycopg2.DatabaseError as e:
-                if conn is not None:
-                    conn.rollback()
-                print 'Error: %s' % e
+            except:
+                print("Error: missing file .dbsettings")
                 sys.exit(1)
-            finally:
-                if conn is not None:
-                    conn.close()
+        conn = None
+        try:
+            conn = psycopg2.connect(dbset)
+            cur = conn.cursor()
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS bovquotes ("
+                "TIPREG INTEGER, DATAPREG DATE, CODDBI VARCHAR(2), "
+                "CODNEG VARCHAR(12), TPMERC INTEGER, "
+                "NOMRES VARCHAR(12), ESPECI VARCHAR(10), "
+                "PRAZOT VARCHAR(3), MODREF VARCHAR(4), "
+                "PREABE DECIMAL(13,2), PREMAX DECIMAL(13,2), "
+                "PREMIN DECIMAL(13,2), PREMED DECIMAL(13,2), "
+                "PREULT DECIMAL(13,2), PREOFC DECIMAL(13,2), "
+                "PREOFV DECIMAL(13,2), TOTNEG INTEGER, QUATOT BIGINT, "
+                "VOLTOT DECIMAL(18,2), PREEXE DECIMAL(13,2), "
+                "INDOPC INTEGER, DATVEN DATE, FATCOT INTEGER, "
+                "PTOEXE DECIMAL(13,6), CODISI VARCHAR(12), "
+                "DISMES INTEGER, "
+                "PRIMARY KEY(TPMERC, CODDBI, CODNEG, DATAPREG, PRAZOT))")
+            args_str = ','.join(cur.mogrify(
+                "(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+                "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                x) for x in table)
+            cur.execute("INSERT INTO bovquotes (" +
+                        ", ".join(keys_table) + ") VALUES " + args_str)
+            conn.commit()
+            print "[DONE]"
+        except psycopg2.DatabaseError as e:
+            if conn is not None:
+                conn.rollback()
+            print 'Error: %s' % e
+            sys.exit(1)
+        finally:
+            if conn is not None:
+                conn.close()
 
-        # Save data in csv file
-        if args.csv:
-            print "Saving data in '" + args.csv + "'...",
-            try:
-                with open(args.csv, 'ab') as f:
-                    writer = csv.writer(f)
-                    writer.writerows(table)
-                print "[DONE]"
-            except IOError as e:
-                print 'Error: %s' % e
-                sys.exit(1)
+    # Save data in csv file
+    if args.csv:
+        print "Saving data in '" + args.csv + "'...",
+        table = [tuple(keys_table)] + table
+        try:
+            with open(args.csv, 'ab') as f:
+                writer = csv.writer(f)
+                writer.writerows(table)
+            print "[DONE]"
+        except IOError as e:
+            print 'Error: %s' % e
+            sys.exit(1)
 
-        # Save data in json file
-        if args.json:
-            print "Saving data in '" + args.json + "'...",
-            keys_table = ['TIPREG', 'DATAPREG', 'CODDBI', 'CODNEG',
-                          'TPMERC', 'NOMRES', 'ESPECI', 'PRAZOT',
-                          'MODREF', 'PREABE', 'PREMAX', 'PREMIN',
-                          'PREMED', 'PREULT', 'PREOFC', 'PREOFV',
-                          'TOTNEG', 'QUATOT', 'VOLTOT', 'PREEXE',
-                          'INDOPC', 'DATVEN', 'FATCOT', 'PTOEXE',
-                          'CODISI', 'DISMES']
-            table_dict = [dict(itertools.izip_longest(keys_table, t))
-                          for t in table]
-            table_dictord = [OrderedDict(sorted(
-                item.iteritems(),
-                key=lambda (k, v): keys_table.index(k))) for
-                             item in table_dict]
-            keys = ['item' + str(n) for n in range(0,len(table))]
-            table_json = dict(
-                itertools.izip_longest(keys, table_dictord))
-            table_jsonord = OrderedDict((k, table_json[k]) for k in keys)
-            try:
-                with open(args.json, 'ab') as f:
-                    json.dump(table_jsonord, f, indent=4)
-                print "[DONE]"
-            except IOError as e:
-                print 'Error: %s' % e
+    # Save data in json file
+    if args.json:
+        print "Saving data in '" + args.json + "'...",
+        table_dict = [dict(itertools.izip_longest(keys_table, t))
+                      for t in table]
+        table_dictord = [OrderedDict(sorted(
+            item.iteritems(),
+            key=lambda (k, v): keys_table.index(k))) for
+                         item in table_dict]
+        keys = ['item' + str(n) for n in range(0,len(table))]
+        table_json = dict(
+            itertools.izip_longest(keys, table_dictord))
+        table_jsonord = OrderedDict((k, table_json[k]) for k in keys)
+        try:
+            with open(args.json, 'ab') as f:
+                json.dump(table_jsonord, f, indent=4)
+            print "[DONE]"
+        except IOError as e:
+            print 'Error: %s' % e
