@@ -96,7 +96,7 @@ if __name__ == "__main__":
         try:
             print "Downloading file...",
             response = urlopen(
-                "http://www.bmfbovespa.com.br/InstDados/SerHist/"
+                "http://bvmf.bmfbovespa.com.br/InstDados/SerHist/"
                 "COTAHIST_" + dateurl + ".ZIP")
             zipfile = ZipFile(StringIO(response.read()))
             txtfile = zipfile.namelist()[0]
