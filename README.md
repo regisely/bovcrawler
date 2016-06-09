@@ -2,13 +2,13 @@
 
 *bovcrawler* is a crawler for BM&FBOVESPA daily equity prices, volume and other relevant data. It is written in Python 2.7. You can clone the repository by running:
 
-```
+```shell
 git clone https://github.com/regisely/bovcrawler.git
 ```
 
 Then you can have a list of the arguments for the `bovcrawler.py` script with:
 
-```python
+```shell
 python bovcrawler.py
 ```
 
@@ -18,14 +18,13 @@ The second argument is the format which the data is saved: -d or --db to save in
 
 If you want to check the closing price from yesterday of a particular equity you can use a shell script for Linux called `getquote.sh` (Note that if the market was closed yesterday this script will throw an error):
 
-```
+```shell
 ./getquote.sh PETR4
-
 ```
 
 Alternatively, there is a version of this script that uses a GUI:
 
-```
+```shell
 python bov_gui.py
 ```
 
