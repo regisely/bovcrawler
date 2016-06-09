@@ -16,6 +16,12 @@ The first argument is the date, which can be specified as a day (D17022016), a f
 
 The second argument is the format which the data is saved: -d or --db to save in a Postgres table; "-c file.csv" or "--csv file.csv" to save in a csv file; and "-j file.json" or "--json file.json" to save in a JSON file. The Postgres credentials are specified in the .dbsettings file. Note that data from all the equities of BM&FBOVESPA from the specified period of time will be downloaded.
 
+An example of usage of `bovcrawler` is above (note that this will create a file called "quotes.csv" with all the data downloaded):
+
+```shell
+python bovcrawler.py D17022016 --csv quotes.csv
+```
+
 If you want to check the closing price from yesterday of a particular equity you can use a shell script for Linux called `getquote.sh` (Note that if the market was closed yesterday this script will throw an error):
 
 ```shell
