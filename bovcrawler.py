@@ -57,7 +57,7 @@ if __name__ == "__main__":
             sys.exit(1)
         elif args.to[0] == 'A':
             if not (len(args.to[1:]) == 4 and args.to[1:].isdigit() and
-                    args.date[1:] < args.to[1:] < tday.strftime("%Y")):
+                    args.date[1:] < args.to[1:] <= tday.strftime("%Y")):
                 print("Error: invalid date interval")
                 sys.exit(1)
             years = [str(y) for y in
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         elif args.to[0] == 'M':
             if not (len(args.to[1:]) == 6 and args.to[1:].isdigit() and
                     (args.date[3:] + args.date[1:3]) <
-                    (args.to[3:] + args.to[1:3]) <
+                    (args.to[3:] + args.to[1:3]) <=
                     tday.strftime("%Y%m")):
                 print("Error: invalid date interval")
                 sys.exit(1)
