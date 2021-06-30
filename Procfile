@@ -1,1 +1,0 @@
-crawler: python bovcrawler.py

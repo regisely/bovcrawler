@@ -6,9 +6,9 @@ import argparse
 import csv
 import itertools
 import json
-from urllib import urlopen
+from urllib.request import urlopen
 from zipfile import ZipFile, BadZipfile
-from StringIO import StringIO
+from io import BytesIO
 from datetime import date, timedelta
 from collections import OrderedDict
 from os.path import isfile
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # Define dates (limit possible values)
     if args.date[0] not in ['A', 'M', 'D']:
-        print "Error: dates should start with A, M or D, e.g., D17022016"
+        print("Error: dates should start with A, M or D, e.g., D17022016")
         sys.exit(1)
     if args.to:
         if not (args.to[0] == args.date[0] or args.to[0] in ['A', 'M']):
@@ -92,24 +92,25 @@ if __name__ == "__main__":
     for dateurl in args.date:    
 
         # Download file
-        print "Working on " + dateurl + "..."
+        print("Working on", dateurl, "...")
         try:
-            print "Downloading file...",
+            print("Downloading file...")
             response = urlopen(
                 "http://bvmf.bmfbovespa.com.br/InstDados/SerHist/"
                 "COTAHIST_" + dateurl + ".ZIP")
-            zipfile = ZipFile(StringIO(response.read()))
+            zipfile = ZipFile(BytesIO(response.read()))
             txtfile = zipfile.namelist()[0]
             data = zipfile.open(txtfile).readlines()
-            print "[DONE]"
+            print("[DONE]")
         except (IOError, BadZipfile) as e:
-            print 'Error: %s' % e
+            print('Error: %s', e)
             sys.exit(1)
 
         # Load data in right format
-        print "Loading file...",
+        print("Loading file...")
         data = data[1:(len(data)-1)]
         for line in data:
+            line = line.decode('utf8')
             table.append((
                 int(line[0:2]),
                 line[2:6] + '-' + line[6:8] + '-' + line[8:10],
@@ -129,11 +130,11 @@ if __name__ == "__main__":
                 line[208:210], int(line[210:217]),
                 float(line[217:230])/1000000,
                 " ".join(line[230:242].split()), int(line[242:245])))
-        print "[DONE]"
+        print("[DONE]")
 
     # Save data in PostgreSQL table
     if args.db:
-        print "Saving data into pSQL table 'bovquotes'...",
+        print("Saving data into pSQL table 'bovquotes'...")
         if isfile(".dbsettings_1"):
             with open(".dbsettings_1", 'r') as f:
                 dbset = f.read().replace('\n', ' ')
@@ -170,11 +171,11 @@ if __name__ == "__main__":
             cur.execute("INSERT INTO bovquotes (" +
                         ", ".join(keys_table) + ") VALUES " + args_str)
             conn.commit()
-            print "[DONE]"
+            print("[DONE]")
         except psycopg2.DatabaseError as e:
             if conn is not None:
                 conn.rollback()
-            print 'Error: %s' % e
+            print('Error: %s', e)
             sys.exit(1)
         finally:
             if conn is not None:
@@ -182,25 +183,25 @@ if __name__ == "__main__":
 
     # Save data in csv file
     if args.csv:
-        print "Saving data in '" + args.csv + "'...",
+        print("Saving data in '", args.csv, "'...")
         table = [tuple(keys_table)] + table
         try:
-            with open(args.csv, 'ab') as f:
+            with open(args.csv, 'a') as f:
                 writer = csv.writer(f)
                 writer.writerows(table)
-            print "[DONE]"
+            print("[DONE]")
         except IOError as e:
-            print 'Error: %s' % e
+            print('Error: %s', e)
             sys.exit(1)
 
     # Save data in json file
     if args.json:
-        print "Saving data in '" + args.json + "'...",
+        print("Saving data in '", args.json, "'...")
         table_dict = [dict(itertools.izip_longest(keys_table, t))
                       for t in table]
         table_dictord = [OrderedDict(sorted(
             item.iteritems(),
-            key=lambda (k, v): keys_table.index(k))) for
+            key=lambda kv: keys_table.index(kv[0]))) for
                          item in table_dict]
         keys = ['item' + str(n) for n in range(0,len(table))]
         table_json = dict(
@@ -209,6 +210,6 @@ if __name__ == "__main__":
         try:
             with open(args.json, 'ab') as f:
                 json.dump(table_jsonord, f, indent=4)
-            print "[DONE]"
+            print("[DONE]")
         except IOError as e:
-            print 'Error: %s' % e
+            print('Error: %s', e)
